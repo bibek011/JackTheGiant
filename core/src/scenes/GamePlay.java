@@ -17,6 +17,7 @@ import com.bksapps.jackthegiant.GameMain;
 import clouds.Cloud;
 import clouds.CloudsController;
 import helpers.GameInfo;
+import huds.UIHud;
 import player.Player;
 
 /**
@@ -35,9 +36,73 @@ public class GamePlay implements Screen{
     private float lastYPosition;
     private CloudsController cloudsController;
     private Player player;
+    private UIHud hud;
 
     public GamePlay(GameMain game){
         this.game = game;
+    }
+
+
+    @Override
+    public void show() {
+        mainCamera= new OrthographicCamera(GameInfo.WIDTH, GameInfo.HEIGHT);
+        mainCamera.position.set(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f,0);
+        gameViewport= new StretchViewport(GameInfo.WIDTH, GameInfo.HEIGHT, mainCamera);
+
+        box2DCamera= new OrthographicCamera();
+        box2DCamera.setToOrtho(false,GameInfo.WIDTH/GameInfo.PPM,
+                GameInfo.HEIGHT/GameInfo.PPM);
+        box2DCamera.position.set(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f,0);
+        debugRenderer= new Box2DDebugRenderer();
+        hud= new UIHud(game);
+        world= new World(new Vector2(0,-9.8f), true);
+//        cloud= new Cloud(world, "Cloud 1");
+//        cloud.setCloudPosition(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f);
+        cloudsController=new CloudsController(world);
+        player=cloudsController.positionThePlayer(player);
+        createBackgrounds();
+    }
+
+    public void handleInput(float dt){
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            player.movePlayer(-2);
+        }else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            player.movePlayer(2);
+        }else{
+            player.setWalking(false);
+        }
+    }
+
+    void update(float dt){
+        handleInput(dt);
+        //moveCamera();
+        checkBackgroundOutOfBounds();
+        cloudsController.setCameraY(mainCamera.position.y);
+        cloudsController.createAndArrangeNewClouds();
+    }
+
+    void moveCamera(){
+        mainCamera.position.y-=1.5f;
+    }
+
+    @Override
+    public void render(float delta) {
+        update(delta);
+        Gdx.gl.glClearColor(1, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        game.getBatch().begin();
+        drawBackground();
+        cloudsController.drawClouds(game.getBatch());
+        player.drawPlayerIdle(game.getBatch());
+        player.drawPlayerAnimation(game.getBatch());
+        game.getBatch().end();
+        debugRenderer.render(world,box2DCamera.combined);
+        game.getBatch().setProjectionMatrix(mainCamera.combined);
+        mainCamera.update();
+        game.getBatch().setProjectionMatrix(hud.getStage().getCamera().combined);
+        hud.getStage().draw();
+        player.updatePlayer();
+        world.step(Gdx.graphics.getDeltaTime(), 6,2);
     }
 
     void createBackgrounds(){
@@ -66,64 +131,8 @@ public class GamePlay implements Screen{
     }
 
     @Override
-    public void show() {
-        mainCamera= new OrthographicCamera(GameInfo.WIDTH, GameInfo.HEIGHT);
-        mainCamera.position.set(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f,0);
-        gameViewport= new StretchViewport(GameInfo.WIDTH, GameInfo.HEIGHT, mainCamera);
-
-        box2DCamera= new OrthographicCamera();
-        box2DCamera.setToOrtho(false,GameInfo.WIDTH/GameInfo.PPM,
-                GameInfo.HEIGHT/GameInfo.PPM);
-        box2DCamera.position.set(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f,0);
-        debugRenderer= new Box2DDebugRenderer();
-        world= new World(new Vector2(0,-9.8f), true);
-//        cloud= new Cloud(world, "Cloud 1");
-//        cloud.setCloudPosition(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f);
-        cloudsController=new CloudsController(world);
-        player=cloudsController.positionThePlayer(player);
-        createBackgrounds();
-    }
-
-    public void handleInput(float dt){
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            player.movePlayer(-2);
-        }else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            player.movePlayer(2);
-        }
-    }
-
-    void update(float dt){
-        handleInput(dt);
-        moveCamera();
-        checkBackgroundOutOfBounds();
-        cloudsController.setCameraY(mainCamera.position.y);
-        cloudsController.createAndArrangeNewClouds();
-    }
-
-    void moveCamera(){
-        mainCamera.position.y-=1.5f;
-    }
-
-    @Override
-    public void render(float delta) {
-        update(delta);
-        Gdx.gl.glClearColor(1, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.getBatch().begin();
-        drawBackground();
-        cloudsController.drawClouds(game.getBatch());
-        player.drawPlayer(game.getBatch());
-        game.getBatch().end();
-        debugRenderer.render(world,box2DCamera.combined);
-        game.getBatch().setProjectionMatrix(mainCamera.combined);
-        mainCamera.update();
-        player.updatePlayer();
-        world.step(Gdx.graphics.getDeltaTime(), 6,2);
-    }
-
-    @Override
     public void resize(int width, int height) {
-
+        gameViewport.update(width, height);
     }
 
     @Override
@@ -143,6 +152,12 @@ public class GamePlay implements Screen{
 
     @Override
     public void dispose() {
-
+        world.dispose();
+        for(int i=0; i<bgs.length; i++){
+            bgs[i].getTexture().dispose();
+        }
+        player.getTexture().dispose();
+        debugRenderer.dispose();
+        hud.getStage().dispose();
     }
 }
