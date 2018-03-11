@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 
 import java.util.Random;
 
+import collectables.Collectable;
 import helpers.GameInfo;
 import player.Player;
 
@@ -19,11 +20,14 @@ public class CloudsController {
 
     private World world;
     private Array<Cloud>clouds= new Array<Cloud>();
+    private Array<Collectable> collectables= new Array<Collectable>();
     private final float DISTANCE_BETWEEN_CLOUDS=250f;
     private float minX, maxX;
     private Random random= new Random();
     private float cameraY;
     private float lastCloudPositionY;
+
+
     public CloudsController(World world){
 
         this.world= world;
@@ -85,8 +89,12 @@ public class CloudsController {
                 positionY-=DISTANCE_BETWEEN_CLOUDS;
                 lastCloudPositionY=positionY;
             }
-
         }
+
+        //Remove this later. This is just a test
+        Collectable c1= new Collectable(world, "Life");
+        c1.setCollectablePosition(clouds.get(1).getX(), clouds.get(1).getY()+40);
+        collectables.add(c1);
 
     }
 
@@ -102,6 +110,13 @@ public class CloudsController {
             }else{
                 batch.draw(cloud, cloud.getX()-cloud.getWidth()/2f+10, cloud.getY()-cloud.getHeight()/2f);
             }
+        }
+    }
+
+    public void drawCollectables(SpriteBatch batch){
+        for(Collectable collectable : collectables){
+            collectable.updateCollectable();
+            batch.draw(collectable, collectable.getX(), collectable.getY());
         }
     }
 
@@ -126,7 +141,7 @@ public class CloudsController {
     }
 
     public Player positionThePlayer(Player player){
-        player=new Player(world, clouds.get(0).getX(), clouds.get(0).getY()+100);
+        player=new Player(world, clouds.get(0).getX(), clouds.get(0).getY()+78);
         return  player;
     }
 

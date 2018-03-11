@@ -71,7 +71,16 @@ public class Player extends Sprite{
     }
 
     public void updatePlayer(){
-        this.setPosition(body.getPosition().x*GameInfo.PPM, body.getPosition().y*GameInfo.PPM);
+
+        if(body.getLinearVelocity().x>0){// going right
+
+            this.setPosition(body.getPosition().x*GameInfo.PPM, body.getPosition().y*GameInfo.PPM);
+
+        }else if(body.getLinearVelocity().x<0){//going left
+
+            this.setPosition((body.getPosition().x-0.3f) * GameInfo.PPM, body.getPosition().y*GameInfo.PPM);
+
+        }
     }
 
     public void drawPlayerIdle(SpriteBatch batch){

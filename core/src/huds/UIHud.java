@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bksapps.jackthegiant.GameMain;
 
 import helpers.GameInfo;
+import scenes.MainMenu;
 
 /**
  * Created by TERRORMASTER on 3/11/2018.
@@ -31,9 +32,9 @@ public class UIHud {
     private GameMain game;
     private Stage stage;
     private Viewport gameViewport;
-    private Image coinImage, scoreImage, lifeImage;
+    private Image coinImage, scoreImage, lifeImage, pausePanel;
     private Label scoreLabel, coinLabel, lifeLabel;
-    private ImageButton pauseBtn;
+    private ImageButton pauseBtn, resumeBtn, quitBtn;
 
     public UIHud(GameMain game){
         this.game=game;
@@ -42,6 +43,7 @@ public class UIHud {
         Gdx.input.setInputProcessor(stage);
 
         createAndPositionUIElements();
+        createButtons();
         Table lifeAndCoinTable= new Table();
         lifeAndCoinTable.top().left();
         lifeAndCoinTable.setFillParent(true);
@@ -71,15 +73,7 @@ public class UIHud {
         lifeImage= new Image(new Texture("Collectables/Life.png"));
         scoreImage= new Image(new Texture("Buttons/Gameplay/Score.png"));
 
-        //Buttons
-        pauseBtn= new ImageButton(new SpriteDrawable(new Sprite(new Texture("Buttons/Gameplay/Pause.png"))));
-        pauseBtn.setPosition(470,17, Align.bottomRight);
-        pauseBtn.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                //Code for pausing the game
-            }
-        });
+
 
         //Labels
         FreeTypeFontGenerator generator= new FreeTypeFontGenerator(Gdx.files.internal("Fonts/blow.ttf"));
@@ -90,6 +84,57 @@ public class UIHud {
         coinLabel= new Label("x0", new Label.LabelStyle(font, Color.WHITE));
         lifeLabel= new Label("x2", new Label.LabelStyle(font, Color.WHITE));
         scoreLabel= new Label("100", new Label.LabelStyle(font, Color.WHITE));
+    }
+
+    void createButtons(){
+        //Buttons
+        pauseBtn= new ImageButton(new SpriteDrawable(new Sprite(new Texture("Buttons/Gameplay/Pause.png"))));
+        pauseBtn.setPosition(470,17, Align.bottomRight);
+        pauseBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                //Pause the game
+                createPausePanel();
+                pauseBtn.remove();
+            }
+        });
+    }
+
+    void createPausePanel(){
+        pausePanel= new Image(new Texture("Buttons/Pause/Pause Panel.png"));
+//        pausePanel.setPosition((GameInfo.WIDTH/2f)-(pausePanel.getWidth()/2f),
+//                (GameInfo.HEIGHT/2f)-(pausePanel.getHeight()/2f), Align.center);
+        pausePanel.setPosition(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f, Align.center);
+        resumeBtn= new ImageButton(new SpriteDrawable(new Sprite(new Texture("Buttons/Pause/Resume.png"))));
+        quitBtn= new ImageButton(new SpriteDrawable(new Sprite(new Texture("Buttons/Pause/Quit 2.png"))));
+
+        resumeBtn.setPosition(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2+50, Align.center);
+        quitBtn.setPosition(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2-80, Align.center);
+
+        resumeBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                removepausePanel();
+                stage.addActor(pauseBtn);
+            }
+        });
+
+        quitBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new MainMenu(game));
+            }
+        });
+
+        stage.addActor(pausePanel);
+        stage.addActor(resumeBtn);
+        stage.addActor(quitBtn);
+    }
+
+    void removepausePanel(){
+        pausePanel.remove();
+        resumeBtn.remove();
+        quitBtn.remove();
     }
 
     public Stage getStage() {
