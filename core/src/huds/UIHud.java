@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.bksapps.jackthegiant.GameMain;
 
 import helpers.GameInfo;
+import helpers.GameManager;
 import scenes.MainMenu;
 
 /**
@@ -41,6 +42,15 @@ public class UIHud {
         gameViewport= new FitViewport(GameInfo.WIDTH, GameInfo.HEIGHT,new OrthographicCamera());
         stage= new Stage(gameViewport, game.getBatch());
         Gdx.input.setInputProcessor(stage);
+
+        if(GameManager.getInstance().gameStartedFromMainMenu){
+            //This is the first time starting the game, set initial values
+            GameManager.getInstance().gameStartedFromMainMenu=false;
+            GameManager.getInstance().lifeScore=2;
+            GameManager.getInstance().coinScore=0;
+            GameManager.getInstance().score=0;
+
+        }
 
         createAndPositionUIElements();
         createButtons();
@@ -81,9 +91,9 @@ public class UIHud {
         parameter.size=40;
 
         BitmapFont font= generator.generateFont(parameter);
-        coinLabel= new Label("x0", new Label.LabelStyle(font, Color.WHITE));
-        lifeLabel= new Label("x2", new Label.LabelStyle(font, Color.WHITE));
-        scoreLabel= new Label("100", new Label.LabelStyle(font, Color.WHITE));
+        coinLabel= new Label("x"+GameManager.getInstance().coinScore, new Label.LabelStyle(font, Color.WHITE));
+        lifeLabel= new Label("x"+GameManager.getInstance().lifeScore, new Label.LabelStyle(font, Color.WHITE));
+        scoreLabel= new Label(""+GameManager.getInstance().score, new Label.LabelStyle(font, Color.WHITE));
     }
 
     void createButtons(){
@@ -94,8 +104,11 @@ public class UIHud {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 //Pause the game
-                createPausePanel();
-                pauseBtn.remove();
+                if(!GameManager.getInstance().isPaused){
+                    GameManager.getInstance().isPaused=true;
+                    createPausePanel();
+                    pauseBtn.remove();
+                }
             }
         });
     }
@@ -114,8 +127,12 @@ public class UIHud {
         resumeBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                removepausePanel();
-                stage.addActor(pauseBtn);
+                if(GameManager.getInstance().isPaused){
+                    GameManager.getInstance().isPaused=false;
+                    removepausePanel();
+                    stage.addActor(pauseBtn);
+                }
+
             }
         });
 
@@ -137,7 +154,55 @@ public class UIHud {
         quitBtn.remove();
     }
 
+    public void createGameOverPanel(){
+        Image gameOverPanel= new Image(new Texture("Buttons/Pause/Show Score.png"));
+        FreeTypeFontGenerator generator= new FreeTypeFontGenerator(Gdx.files.internal("Fonts/blow.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter= new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size=70;
+        BitmapFont font= generator.generateFont(parameter);
+
+        Label endScore= new Label(""+GameManager.getInstance().score, new Label.LabelStyle(font, Color.WHITE));
+
+        Label endCoinScore= new Label(""+GameManager.getInstance().coinScore, new Label.LabelStyle(font, Color.WHITE));
+
+        gameOverPanel.setPosition(GameInfo.WIDTH/2f, GameInfo.HEIGHT/2f, Align.center);
+
+        endScore.setPosition(GameInfo.WIDTH/2f-30, GameInfo.HEIGHT/2f+20, Align.center);
+
+        endCoinScore.setPosition(GameInfo.WIDTH/2f-30, GameInfo.HEIGHT/2f-90, Align.center);
+        stage.addActor(gameOverPanel);
+        stage.addActor(endScore);
+        stage.addActor(endCoinScore);
+
+    }
+
+    public void incrementScore(int score){
+        GameManager.getInstance().score+=score;
+        scoreLabel.setText(""+GameManager.getInstance().score);
+    }
+
+    public void incrementCoinScore(){
+        GameManager.getInstance().coinScore++;
+        coinLabel.setText("x"+GameManager.getInstance().coinScore);
+        incrementScore(200);
+    }
+
+    public void incrementLifeScore(){
+        GameManager.getInstance().lifeScore++;
+        lifeLabel.setText("x"+GameManager.getInstance().lifeScore);
+        incrementScore(300);
+    }
+
+    public void decrementLife(){
+        GameManager.getInstance().lifeScore--;
+        if(GameManager.getInstance().lifeScore >=0){
+            lifeLabel.setText("x"+ GameManager.getInstance().lifeScore);
+        }
+    }
+
     public Stage getStage() {
         return stage;
     }
+
+
 }//UIHud

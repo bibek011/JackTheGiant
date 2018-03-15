@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import helpers.GameManager;
 import scenes.GamePlay;
 import scenes.MainMenu;
 
@@ -17,6 +18,8 @@ public class GameMain extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
+		GameManager.getInstance().initializeGameData();
+
 		setScreen(new MainMenu(this));
 	}
 

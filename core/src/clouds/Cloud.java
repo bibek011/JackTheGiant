@@ -41,7 +41,7 @@ public class Cloud extends Sprite{
         FixtureDef fixtureDef= new FixtureDef();
         fixtureDef.shape=shape;
         Fixture fixture= body.createFixture(fixtureDef);
-        fixture.setUserData("Cloud");
+        fixture.setUserData(cloudName);
         shape.dispose();
     }
 

@@ -9,6 +9,7 @@ import java.util.Random;
 
 import collectables.Collectable;
 import helpers.GameInfo;
+import helpers.GameManager;
 import player.Player;
 
 
@@ -72,6 +73,7 @@ public class CloudsController {
         }
 
         for(Cloud cloud: clouds){
+
             if(cloud.getX()==0 && cloud.getY()==0){
                 float tempX= 0;
 
@@ -88,14 +90,35 @@ public class CloudsController {
                 cloud.setCloudPosition(tempX, positionY);
                 positionY-=DISTANCE_BETWEEN_CLOUDS;
                 lastCloudPositionY=positionY;
+
+                //Spawn Collectables
+                if(!firstTimeArranging && cloud.getCloudName()!="Dark Cloud"){
+                    int rand= random.nextInt(10);
+                    if(rand>5){
+                        int randomCollectable= random.nextInt(2);
+                        if(randomCollectable==0){
+                            //Spawn a life, if the life cound is lower than 2
+                            if(GameManager.getInstance().lifeScore <2){
+                                Collectable collectable= new Collectable(world, "Life");
+                                collectable.setCollectablePosition(cloud.getX(), cloud.getY()+40);
+                                collectables.add(collectable);
+                            }else{
+                                //Spawn coin instead of life if life is more than 2
+                                Collectable collectable= new Collectable(world, "Coin");
+                                collectable.setCollectablePosition(cloud.getX(), cloud.getY()+40);
+                                collectables.add(collectable);
+                            }
+                        }else {
+                            //Spawn a coin
+                            Collectable collectable= new Collectable(world, "Coin");
+                            collectable.setCollectablePosition(cloud.getX(), cloud.getY()+40);
+                            collectables.add(collectable);
+                        }
+                    }
+                }
             }
+
         }
-
-        //Remove this later. This is just a test
-        Collectable c1= new Collectable(world, "Life");
-        c1.setCollectablePosition(clouds.get(1).getX(), clouds.get(1).getY()+40);
-        collectables.add(c1);
-
     }
 
     private float randomBetweenNumbers(float min, float max){
@@ -120,6 +143,16 @@ public class CloudsController {
         }
     }
 
+    public void removeCollectables(){
+        for(int i=0; i<collectables.size;i++){
+            if(collectables.get(i).getFixture().getUserData()=="Remove"){
+                collectables.get(i).changeFilter();
+                collectables.get(i).getTexture().dispose();
+                collectables.removeIndex(i);
+            }
+        }
+    }
+
     public void createAndArrangeNewClouds(){
 
         for(int i=0; i<clouds.size; i++){
@@ -134,6 +167,16 @@ public class CloudsController {
             positionClouds(false);
         }
 
+    }
+
+    public void removeOffScreenCollectables(){
+        for(int i=0; i<collectables.size; i++){
+            if((collectables.get(i).getY()- GameInfo.HEIGHT/2f-15) >cameraY){
+                collectables.get(i).getTexture().dispose();
+                collectables.removeIndex(i);
+                System.out.println("Removed");
+            }
+        }
     }
 
     public void setCameraY(float cameraY){

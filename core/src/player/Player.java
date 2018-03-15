@@ -29,7 +29,7 @@ public class Player extends Sprite{
     private Animation<TextureRegion> animation;
     private float elapsedTime;
 
-    private boolean isWalking;
+    private boolean isWalking, dead;
 
 
     public Player(World world, float X, float Y){
@@ -38,6 +38,7 @@ public class Player extends Sprite{
         setPosition(X, Y);
         createBody();
         playerAtlas= new TextureAtlas("Player Animation/Player Animation.atlas");
+        dead=false;
     }
 
     void createBody(){
@@ -54,6 +55,8 @@ public class Player extends Sprite{
         fixtureDef.density=4f; //mass of the player
         fixtureDef.shape=shape;
         fixtureDef.friction=2f; //will make player not slide on surface
+        fixtureDef.filter.categoryBits=GameInfo.PLAYER;
+        fixtureDef.filter.maskBits= GameInfo.DEFAULT | GameInfo.COLLECTABLE;
         Fixture fixture= body.createFixture(fixtureDef);
         fixture.setUserData("Player");
         shape.dispose();
@@ -107,6 +110,14 @@ public class Player extends Sprite{
 
     public void setWalking(boolean walking) {
         this.isWalking = walking;
+    }
+
+    public void setDead(boolean dead){
+        this.dead=dead;
+    }
+
+    public boolean isDead(){
+        return this.dead;
     }
 
 }//Player
