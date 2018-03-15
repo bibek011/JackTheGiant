@@ -52,6 +52,7 @@ public class MainMenuButtons {
         stage.addActor(optionsBtn);
         stage.addActor(quitBtn);
         stage.addActor(musicBtn);
+        checkMusic();
 
     }
 
@@ -70,7 +71,9 @@ public class MainMenuButtons {
                 new Texture("Buttons/Main Menu/Quit.png"))));
 
         musicBtn= new ImageButton(new SpriteDrawable(new Sprite(
-                new Texture("Buttons/Main Menu/Music On.png"))));
+                new Texture("Buttons/Main Menu/Music On.png"))), new SpriteDrawable(new Sprite(
+                new Texture("Buttons/Main Menu/Music On.png"))), new SpriteDrawable(new Sprite(
+                new Texture("Buttons/Main Menu/Music Off.png"))));
 
         playBtn.setPosition(GameInfo.WIDTH/2-80, GameInfo.HEIGHT/2+50, Align.center);
         highScoreBtn.setPosition(GameInfo.WIDTH/2-60, GameInfo.HEIGHT/2-20, Align.center);
@@ -127,9 +130,25 @@ public class MainMenuButtons {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 // Codes will be executed when we press the buttons
-                System.out.println("Music Buttons was pressed");
+                if(GameManager.getInstance().gameData.isMusicOn()){
+                    GameManager.getInstance().gameData.setMusicOn(false);
+                    GameManager.getInstance().stopMusic();
+                    musicBtn.setChecked(true);
+                }else{
+                    GameManager.getInstance().gameData.setMusicOn(true);
+                    GameManager.getInstance().playMusic();
+                    musicBtn.setChecked(false);
+                }
+                GameManager.getInstance().saveData();
             }
         });
+    }
+
+    void checkMusic(){
+
+        if(GameManager.getInstance().gameData.isMusicOn()){
+            GameManager.getInstance().playMusic();
+        }
     }
 
     public Stage getStage() {
