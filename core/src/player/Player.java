@@ -44,15 +44,16 @@ public class Player extends Sprite{
     void createBody(){
         BodyDef bodyDef= new BodyDef();
         bodyDef.type= BodyDef.BodyType.DynamicBody;
+        //bodyDef.position.set(getX()/GameInfo.PPM, getY()/GameInfo.PPM);
         bodyDef.position.set(getX()/GameInfo.PPM, getY()/GameInfo.PPM);
 
         body= world.createBody(bodyDef);
         body.setFixedRotation(true);
         PolygonShape shape= new PolygonShape();
-        shape.setAsBox((getWidth()/2f-20)/GameInfo.PPM, (getHeight()/2f)/GameInfo.PPM);
+        shape.setAsBox((getWidth()/2f-20f)/GameInfo.PPM, (getHeight()/2f)/GameInfo.PPM);
 
         FixtureDef fixtureDef= new FixtureDef();
-        fixtureDef.density=4f; //mass of the player
+        fixtureDef.density=0f; //mass of the player
         fixtureDef.shape=shape;
         fixtureDef.friction=2f; //will make player not slide on surface
         fixtureDef.filter.categoryBits=GameInfo.PLAYER;
@@ -77,7 +78,7 @@ public class Player extends Sprite{
 
         if(body.getLinearVelocity().x>0){// going right
 
-            this.setPosition(body.getPosition().x*GameInfo.PPM, body.getPosition().y*GameInfo.PPM);
+            this.setPosition((body.getPosition().x-0.3f)*GameInfo.PPM, body.getPosition().y*GameInfo.PPM);
 
         }else if(body.getLinearVelocity().x<0){//going left
 
@@ -88,7 +89,7 @@ public class Player extends Sprite{
 
     public void drawPlayerIdle(SpriteBatch batch){
         if(!isWalking){
-            batch.draw(this, getX()+getWidth()/2f-5, getY()-getHeight()/2f);
+            batch.draw(this, getX()+getWidth()/2f-20, getY()-getHeight()/2f);
         }
     }
 
